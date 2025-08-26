@@ -4,17 +4,21 @@ import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { CATEGORIA_SERVICE } from '../config/services';
 import { ClientProxy } from '@nestjs/microservices';
 import { FindAllCategoriasDto } from './dto/find-all-categorias.dto';
+import { UseGuards } from '@nestjs/common';
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 
 @Controller('categorias')
 export class CategoriasController {
   constructor(@Inject(CATEGORIA_SERVICE) private readonly categoriasService: ClientProxy) {}
 
+  @UseGuards(SupabaseAuthGuard) 
   @Post()
   create(@Body() createCategoriaDto: CreateCategoriaDto) {
     console.log("createCategoriaDto", createCategoriaDto);
     return this.categoriasService.send('createCategoria', createCategoriaDto);
   }
 
+  @UseGuards(SupabaseAuthGuard) 
   @Get()
   findAll(@Query() query: FindAllCategoriasDto) {
     console.log('Gateway - Query recibido:', query);
@@ -22,6 +26,7 @@ export class CategoriasController {
     return this.categoriasService.send('findAllCategorias', query);
   }
 
+  @UseGuards(SupabaseAuthGuard) 
   @Get(':id')
   findOne(
     @Param('id') id: number,
@@ -44,6 +49,7 @@ export class CategoriasController {
 
 
 
+  @UseGuards(SupabaseAuthGuard) 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -54,6 +60,7 @@ export class CategoriasController {
     return this.categoriasService.send('updateCategoria', payload);
   }
 
+  @UseGuards(SupabaseAuthGuard) 
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.categoriasService.send('removeCategoria', { id });
