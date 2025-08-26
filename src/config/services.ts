@@ -1,4 +1,6 @@
 // export const PRODUCT_SERVICE = 'PRODUCT_SERVICE';
 export const CATEGORIA_SERVICE = 'CATEGORIA_SERVICE';
+export const POST_SERVICE = 'POST_SERVICE';
+export const USER_SERVICE = 'USER_SERVICE';
 
 // export const NATS_SERVICE = 'NATS_SERVICE';

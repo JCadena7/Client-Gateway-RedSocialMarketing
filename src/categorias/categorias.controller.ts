@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, ParseIntPipe, Query } from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { CATEGORIA_SERVICE } from '../config/services';
 import { ClientProxy } from '@nestjs/microservices';
+import { FindAllCategoriasDto } from './dto/find-all-categorias.dto';
 
 @Controller('categorias')
 export class CategoriasController {
@@ -10,26 +11,51 @@ export class CategoriasController {
 
   @Post()
   create(@Body() createCategoriaDto: CreateCategoriaDto) {
+    console.log("createCategoriaDto", createCategoriaDto);
     return this.categoriasService.send('createCategoria', createCategoriaDto);
   }
 
   @Get()
-  findAll() {
-    return this.categoriasService.send('findAllCategorias', {});
+  findAll(@Query() query: FindAllCategoriasDto) {
+    console.log('Gateway - Query recibido:', query);
+    
+    return this.categoriasService.send('findAllCategorias', query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoriasService.send('findOneCategoria', { id });
-  }
+  findOne(
+    @Param('id') id: number,
+    @Query('withPosts') withPosts?: string  // 👈 AGREGAR ESTO
+  ) {
+  console.log('Gateway - ID:', id, 'withPosts:', withPosts);
+  
+  return this.categoriasService.send('findOneCategoria', { 
+    id,
+    withPosts: withPosts === 'true'  // 👈 CONVERTIR STRING A BOOLEAN
+  });
+}
+
+  // @Patch(':id')
+  // update(@Param('id') id: number, @Body() updateCategoriaDto: UpdateCategoriaDto) {
+  //   console.log("id", id);
+  //   console.log("updateCategoriaDto", updateCategoriaDto);
+  //   return this.categoriasService.send('updateCategoria', { id, updateCategoriaDto });
+  // }
+
+
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoriaDto: UpdateCategoriaDto) {
-    return this.categoriasService.send('updateCategoria', { id, updateCategoriaDto });
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCategoriaDto: UpdateCategoriaDto,
+  ) {
+    // Prioriza id del path
+    const payload = { id, ...updateCategoriaDto };
+    return this.categoriasService.send('updateCategoria', payload);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: number) {
     return this.categoriasService.send('removeCategoria', { id });
   }
 }

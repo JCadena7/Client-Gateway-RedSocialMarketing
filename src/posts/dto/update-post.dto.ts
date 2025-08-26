@@ -1,11 +1,11 @@
 import { PartialType } from '@nestjs/mapped-types';
+import { CreatePostDto } from './create-post.dto';
 import { Type } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
-import { CreateCategoriaDto } from './create-categoria.dto';
 
-export class UpdateCategoriaDto extends PartialType(CreateCategoriaDto) {
-  @Type(() => Number)
+export class UpdatePostDto extends PartialType(CreatePostDto) {
   @IsInt()
   @IsNotEmpty()
+  @Type(() => Number)
   id: number;
 }
