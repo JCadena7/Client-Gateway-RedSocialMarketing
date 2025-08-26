@@ -5,12 +5,24 @@ interface EnvVars {
   PORT: number;
   CATEGORIAS_MICROSERVICE_HOST: string;
   CATEGORIAS_MICROSERVICE_PORT: number;
+  POST_MICROSERVICE_HOST: string;
+  POST_MICROSERVICE_PORT: number;
+  USER_MICROSERVICE_HOST: string;
+  USER_MICROSERVICE_PORT: number;
+  AUTH_MICROSERVICE_HOST: string;
+  AUTH_MICROSERVICE_PORT: number;
 }
 
 const envSchema = Joi.object({
   PORT: Joi.number().required(),
   CATEGORIAS_MICROSERVICE_HOST: Joi.string().required(),
   CATEGORIAS_MICROSERVICE_PORT: Joi.number().required(),
+  POST_MICROSERVICE_HOST: Joi.string().required(),
+  POST_MICROSERVICE_PORT: Joi.number().required(),
+  USER_MICROSERVICE_HOST: Joi.string().required(),
+  USER_MICROSERVICE_PORT: Joi.number().required(),
+  AUTH_MICROSERVICE_HOST: Joi.string().required(),
+  AUTH_MICROSERVICE_PORT: Joi.number().required(),
 }).unknown(true);
 
 const { error, value } = envSchema.validate({
@@ -26,4 +38,13 @@ export const envs = {
 
   categoriasMicroserviceHost: envVars.CATEGORIAS_MICROSERVICE_HOST,
   categoriasMicroservicePort: envVars.CATEGORIAS_MICROSERVICE_PORT,
+
+  postMicroserviceHost: envVars.POST_MICROSERVICE_HOST,
+  postMicroservicePort: envVars.POST_MICROSERVICE_PORT,
+
+  userMicroserviceHost: envVars.USER_MICROSERVICE_HOST,
+  userMicroservicePort: envVars.USER_MICROSERVICE_PORT,
+
+  authMicroserviceHost: envVars.AUTH_MICROSERVICE_HOST,
+  authMicroservicePort: envVars.AUTH_MICROSERVICE_PORT,
 };
