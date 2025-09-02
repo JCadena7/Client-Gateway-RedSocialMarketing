@@ -46,8 +46,11 @@ export class SupabaseAuthGuard implements CanActivate {
         sub: user.id,
         email: user.email,
         role: user.role || 'authenticated',
+        rolId: user.role_id || null,
         raw: user,
       };
+
+      console.log('User:', req.user);
 
       return true;
     } catch (e) {
