@@ -11,18 +11,23 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { firstValueFrom } from 'rxjs';
 import { DeleteManyDto } from './dto/delete-many.dto';
 import { RevokeManyPermisosFromRoleBodyDto } from './dto/revoke-many-permisos-from-role.body.dto';
+import { RbacGuard } from '../auth/guards/rbac.guard';
+import { RequirePermisos } from '../auth/decorators/permissions.decorator';
+
 
 @Controller('rbac')
+@UseGuards(SupabaseAuthGuard, RbacGuard)
+@RequirePermisos('admin_completo')
 export class RbacController {
   constructor(@Inject(AUTH_SERVICE) private readonly rbacService: ClientProxy) {}
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Post('roles')
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rbacService.send('role.create', createRoleDto);
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Post('permisos')
   createPermiso(@Body() createPermisoDto: CreatePermisoDto) {
     return this.rbacService.send('permiso.create', createPermisoDto);
@@ -34,13 +39,13 @@ export class RbacController {
     return this.rbacService.send('role.list', {});
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Get('permisos')
   findAllpermisos() {
     return this.rbacService.send('permiso.list', {});
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Get('permisosByRole')
   listPermisosByRole(@Query() query: { rolId: number }) {
     return this.rbacService.send('rolePermiso.listByRole', query);
@@ -55,7 +60,7 @@ export class RbacController {
   }
 
   // Gateway - cambiar para enviar camelCase
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('roles/:roleId/permisos/:permisoId')
   async remove(
     @Param('roleId', ParseIntPipe) roleId: number,
@@ -81,35 +86,35 @@ export class RbacController {
   }
 
   // Eliminar un rol por ID
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('roles/:id')
   deleteRole(@Param('id', ParseIntPipe) id: number) {
     return this.rbacService.send('role.delete', { id });
   }
 
   // Eliminar múltiples roles por IDs
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('roles')
   deleteRoles(@Body() dto: DeleteManyDto) {
     return this.rbacService.send('role.deleteMany', dto);
   }
 
   // Eliminar un permiso por ID
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('permisos/:id')
   deletePermiso(@Param('id', ParseIntPipe) id: number) {
     return this.rbacService.send('permiso.delete', { id });
   }
 
   // Eliminar múltiples permisos por IDs
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('permisos')
   deletePermisos(@Body() dto: DeleteManyDto) {
     return this.rbacService.send('permiso.deleteMany', dto);
   }
 
   // Revocar múltiples permisos de un rol
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete('roles/:rolId/permisos')
   revokeManyPermisos(
     @Param('rolId', ParseIntPipe) rolId: number,

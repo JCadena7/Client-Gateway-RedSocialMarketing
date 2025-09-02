@@ -7,8 +7,13 @@ import { USER_SERVICE } from '../config/services';
 import { FindUsersDto } from './dto/find-users.dto';
 import { UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { RbacGuard } from '../auth/guards/rbac.guard';
+import { RequirePermisos } from '../auth/decorators/permissions.decorator';
 
 @Controller('users')
+@UseGuards(SupabaseAuthGuard, RbacGuard)
+@RequirePermisos('admin_completo')
+ 
 export class UsersController {
   constructor(@Inject(USER_SERVICE) private readonly usersService: ClientProxy) {}
 

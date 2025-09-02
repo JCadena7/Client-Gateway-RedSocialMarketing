@@ -13,38 +13,38 @@ import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 export class PostsController {
   constructor(@Inject(POST_SERVICE) private readonly postsService: ClientProxy) {}
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
     return this.postsService.send('createPost', createPostDto);
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Get()
   findAll(@Query() query: FindPostsDto) {
     return this.postsService.send('findAllPosts', query);
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.postsService.send('findOnePost', { id });
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Patch(':id')
   update(@Param('id') id: number, @Body() updatePostDto: UpdatePostDto) {
     return this.postsService.send('updatePost', { id, ...updatePostDto });
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: number) {
     console.log('Gateway - ID en posts:', id);
     return this.postsService.send('removePost', { id });
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  // @UseGuards(SupabaseAuthGuard)
   @Post(':id/add-categorias')
   addCategorias(@Param('id') id: number, @Body() addCategoriasDto: AddCategoriasPostDto) {
     return this.postsService.send('addCategoriasPost', { id, ...addCategoriasDto });

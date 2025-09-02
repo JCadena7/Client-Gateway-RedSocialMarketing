@@ -1,19 +1,9 @@
-// import { Module } from '@nestjs/common';
-// import { RbacService } from './rbac.service';
-// import { RbacController } from './rbac.controller';
-
-// @Module({
-//   controllers: [RbacController],
-//   providers: [RbacService],
-// })
-// export class RbacModule {}
-
-
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { RbacController } from './rbac.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { envs, AUTH_SERVICE} from '../config';
 
+@Global()
 @Module({
   controllers: [RbacController],
   providers: [],
@@ -29,5 +19,6 @@ import { envs, AUTH_SERVICE} from '../config';
       },
     ]),
   ],
+  exports: [ClientsModule],
 })
 export class RbacModule {}
