@@ -13,7 +13,6 @@ import { RequirePermisos } from '../auth/decorators/permissions.decorator';
 @Controller('users')
 @UseGuards(SupabaseAuthGuard, RbacGuard)
 @RequirePermisos('admin_completo')
- 
 export class UsersController {
   constructor(@Inject(USER_SERVICE) private readonly usersService: ClientProxy) {}
 
@@ -23,14 +22,22 @@ export class UsersController {
     return this.usersService.send('createUser', createUserDto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.usersService.send('findAllUsers', {});
-  // }
   @UseGuards(SupabaseAuthGuard)
   @Get()
   findAll(@Query() query: FindUsersDto) {
     return this.usersService.send('findAllUsers', query);
+  }
+
+  @UseGuards(SupabaseAuthGuard)
+  @Get('username/:username')
+  findByUsername(@Param('username') username: string) {
+    return this.usersService.send('findUserByUsername', { username });
+  }
+
+  @UseGuards(SupabaseAuthGuard)
+  @Get('clerk/:clerkId')
+  findByClerkId(@Param('clerkId') clerkId: string) {
+    return this.usersService.send('findUserByClerkId', { clerkId });
   }
 
   @UseGuards(SupabaseAuthGuard)
