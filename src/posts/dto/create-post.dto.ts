@@ -49,10 +49,11 @@ export class CreatePostDto {
   @IsOptional()
   fecha_publicacion?: string;
 
+  // Keywords - IDs de palabras clave existentes o nuevas a crear
   @IsArray()
   @IsOptional()
-  @IsString({ each: true })
-  palabras_clave?: string[];
+  @IsInt({ each: true })
+  keyword_ids?: number[];
 
   @IsInt()
   @IsOptional()
@@ -64,4 +65,10 @@ export class CreatePostDto {
   @IsOptional()
   @IsInt({ each: true })
   categoria_ids?: number[];
+
+  // Nuevas keywords como strings (se crearán automáticamente)
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  new_keywords?: string[];
 }
