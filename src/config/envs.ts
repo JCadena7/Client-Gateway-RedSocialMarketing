@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 interface EnvVars {
   PORT: number;
+  CORS_ORIGIN: string;
   CATEGORIAS_MICROSERVICE_HOST: string;
   CATEGORIAS_MICROSERVICE_PORT: number;
   POST_MICROSERVICE_HOST: string;
@@ -17,6 +18,7 @@ interface EnvVars {
 
 const envSchema = Joi.object({
   PORT: Joi.number().required(),
+  CORS_ORIGIN: Joi.string().default('http://localhost:4321'),
   CATEGORIAS_MICROSERVICE_HOST: Joi.string().required(),
   CATEGORIAS_MICROSERVICE_PORT: Joi.number().required(),
   POST_MICROSERVICE_HOST: Joi.string().required(),
@@ -39,6 +41,7 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
+  corsOrigin: envVars.CORS_ORIGIN,
 
   categoriasMicroserviceHost: envVars.CATEGORIAS_MICROSERVICE_HOST,
   categoriasMicroservicePort: envVars.CATEGORIAS_MICROSERVICE_PORT,
