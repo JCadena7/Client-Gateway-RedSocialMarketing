@@ -3,6 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../config/services';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
+import { ValidateEmailDto } from './dto/validate-email.dto';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -21,6 +22,11 @@ export class AuthsController {
   @Post('sign-in')
   signIn(@Body() dto: SignInDto) {
     return this.authsService.send('auth.signIn', dto);
+  }
+
+  @Post('validate-email')
+  validateEmail(@Body() dto: ValidateEmailDto) {
+    return this.authsService.send('auth.validateEmail', dto);
   }
 
   @UseGuards(SupabaseAuthGuard)

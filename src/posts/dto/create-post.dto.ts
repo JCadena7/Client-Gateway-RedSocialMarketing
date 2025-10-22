@@ -11,6 +11,8 @@ import {
   ArrayNotEmpty,
   IsInt,
   IsNotEmpty,
+  IsNumber,
+  ValidateNested,
 } from 'class-validator';
 
 export class CreatePostDto {
@@ -71,4 +73,38 @@ export class CreatePostDto {
   @IsOptional()
   @IsString({ each: true })
   new_keywords?: string[];
+
+  // ==================== CAMPOS SEO OPCIONALES ====================
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  meta_title?: string;
+
+  @IsOptional()
+  @IsString()
+  meta_description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  focus_keyword?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  readabilityScore?: number;
+
+  // ==================== CAMPOS EDITORIAL OPCIONALES ====================
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  reviewer_id?: number;
+
+  @IsOptional()
+  @IsDateString()
+  review_date?: string;
+
+  @IsOptional()
+  @IsString()
+  review_notes?: string;
 }

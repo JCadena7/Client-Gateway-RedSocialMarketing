@@ -41,11 +41,13 @@ export class ComentariosController {
   @Get('post/:postId')
   findByPost(
     @Param('postId', ParseIntPipe) postId: number,
-    @Query('withReplies') withReplies?: string
+    @Query('withReplies') withReplies?: string,
+    @Query('withUser') withUser?: string
   ) {
     return this.comentariosService.send('findComentariosByPost', { 
       postId,
-      withReplies: withReplies === 'true'
+      withReplies: withReplies === 'true',
+      withUser: withUser === 'true'
     });
   }
 

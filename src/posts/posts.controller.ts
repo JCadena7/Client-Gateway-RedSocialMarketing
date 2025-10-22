@@ -85,13 +85,41 @@ export class PostsController {
   }
 
   @Post('like/:postId')
-  darLike(@Param('postId') postId: number, @Body() body: { userId: number }) {
-    return this.postsService.send('darLike', { postId, userId: body.userId });
+  async darLike(@Param('postId') postId: number, @Body() body: { userId: number }) {
+    console.log('🔵 Gateway - darLike:', { postId, userId: body.userId });
+    try {
+      const result = await this.postsService.send('darLike', { 
+        postId: Number(postId), 
+        userId: Number(body.userId) 
+      }).toPromise();
+      console.log('✅ Gateway - darLike success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Gateway - darLike error:', error);
+      throw error;
+    }
   }
 
   @Delete('like/:postId')
-  quitarLike(@Param('postId') postId: number, @Body() body: { userId: number }) {
-    return this.postsService.send('quitarLike', { postId, userId: body.userId });
+  async quitarLike(@Param('postId') postId: number, @Body() body: { userId?: number }, @Query('userId') queryUserId?: number) {
+    const userId = body?.userId || queryUserId;
+    console.log('🔴 Gateway - quitarLike:', { postId, userId, body, queryUserId });
+    
+    if (!userId) {
+      throw new Error('userId es requerido en body o query params');
+    }
+    
+    try {
+      const result = await this.postsService.send('quitarLike', { 
+        postId: Number(postId), 
+        userId: Number(userId) 
+      }).toPromise();
+      console.log('✅ Gateway - quitarLike success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Gateway - quitarLike error:', error);
+      throw error;
+    }
   }
 
   // ==================== ENDPOINTS PARA KEYWORDS ====================
