@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { POST_SERVICE } from '../config/services';
@@ -6,8 +20,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { AddCategoriasPostDto } from './dto/add-categorias-post.dto';
 import { FindPostsDto } from './dto/find-posts.dto';
-import { UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import type { Express } from 'express';
 
 @Controller('posts')
 export class PostsController {
@@ -17,6 +33,28 @@ export class PostsController {
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
     return this.postsService.send('createPost', createPostDto);
+  }
+
+  @UseGuards(SupabaseAuthGuard)
+  @Post(':id/imagen-destacada')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  uploadFeaturedImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('El archivo es requerido');
+    }
+
+    return this.postsService.send('uploadPostFeaturedImage', {
+      postId: id,
+      file: this.serializeFile(file),
+    });
   }
 
   // @UseGuards(SupabaseAuthGuard)
@@ -80,8 +118,20 @@ export class PostsController {
   // ==================== ENDPOINTS QUE USAN TRIGGERS ====================
 
   @Post('vista/:postId')
-  incrementarVista(@Param('postId') postId: number, @Body() body: { userId?: number; ipAddress?: string }) {
-    return this.postsService.send('incrementarVista', { postId, userId: body.userId, ipAddress: body.ipAddress });
+  async incrementarVista(@Param('postId') postId: number, @Body() body: { userId?: number; ipAddress?: string }) {
+    console.log("las variables son primero del user: ", body.userId, "del ip: ", body.ipAddress);
+    try {
+      const response$ = this.postsService.send('incrementarVista', {
+        postId,
+        userId: body.userId,
+        ipAddress: body.ipAddress,
+      });
+      const result = await response$.toPromise();
+      return result ?? { success: true };
+    } catch (error) {
+      console.error('❌ Gateway - incrementarVista error:', error);
+      throw error;
+    }
   }
 
   @Post('like/:postId')
@@ -195,5 +245,14 @@ export class PostsController {
   @Delete(':postId/keywords')
   removeKeywords(@Param('postId') postId: number, @Body() body: { keywordIds?: number[] }) {
     return this.postsService.send('removeKeywordsFromPost', { postId, keywordIds: body.keywordIds });
+  }
+
+  private serializeFile(file: Express.Multer.File) {
+    return {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      buffer: file.buffer,
+      size: file.size,
+    };
   }
 }
