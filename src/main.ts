@@ -13,6 +13,14 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // ✅ Configuración de CORS
+  app.enableCors({
+    origin: envs.corsOrigin, // Frontend URL desde variable de entorno
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
+
   await app.setGlobalPrefix('api/v1');
 
   app.useGlobalPipes(

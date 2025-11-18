@@ -66,4 +66,25 @@ export class CategoriasController {
   remove(@Param('id') id: number) {
     return this.categoriasService.send('removeCategoria', { id });
   }
+
+  // Endpoints de estadísticas
+  @Get('stats/general')
+  getStats() {
+    return this.categoriasService.send('getCategoriasStats', {});
+  }
+
+  @Get('stats/engagement')
+  getEngagement() {
+    return this.categoriasService.send('getEngagementPorCategoria', {});
+  }
+
+  @Get('stats/mejor-rendimiento')
+  getMejorRendimiento() {
+    return this.categoriasService.send('getCategoriasMejorRendimiento', {});
+  }
+
+  @Get('stats/jerarquicas')
+  getJerarquicas() {
+    return this.categoriasService.send('getCategoriasJerarquicas', {});
+  }
 }

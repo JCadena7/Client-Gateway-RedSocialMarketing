@@ -41,4 +41,15 @@ export class EstadosController {
   remove(@Param('id') id: number) {
     return this.estadosService.send('removeEstado', { id });
   }
+
+  // Endpoints de estadísticas
+  @Get('stats/estadisticas')
+  getEstadisticas() {
+    return this.estadosService.send('getEstadisticasEstados', {});
+  }
+
+  @Get('stats/posts/:estadoNombre')
+  getPostsPorEstado(@Param('estadoNombre') estadoNombre: string) {
+    return this.estadosService.send('getPostsPorEstado', { estadoNombre });
+  }
 }

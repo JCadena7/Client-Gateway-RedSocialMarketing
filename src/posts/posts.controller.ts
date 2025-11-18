@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { POST_SERVICE } from '../config/services';
@@ -6,8 +20,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { AddCategoriasPostDto } from './dto/add-categorias-post.dto';
 import { FindPostsDto } from './dto/find-posts.dto';
-import { UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import type { Express } from 'express';
 
 @Controller('posts')
 export class PostsController {
@@ -19,10 +35,159 @@ export class PostsController {
     return this.postsService.send('createPost', createPostDto);
   }
 
+  @UseGuards(SupabaseAuthGuard)
+  @Post(':id/imagen-destacada')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  uploadFeaturedImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('El archivo es requerido');
+    }
+
+    return this.postsService.send('uploadPostFeaturedImage', {
+      postId: id,
+      file: this.serializeFile(file),
+    });
+  }
+
   // @UseGuards(SupabaseAuthGuard)
   @Get()
   findAll(@Query() query: FindPostsDto) {
     return this.postsService.send('findAllPosts', query);
+  }
+
+  // ==================== ENDPOINTS QUE USAN VISTAS ====================
+
+  @Get('completos')
+  findPostsCompletos(@Query('limit') limit?: number) {
+    return this.postsService.send('findPostsCompletos', { limit: limit ?? 20 });
+  }
+
+  @Get('populares')
+  findPostsPopulares(@Query('limit') limit?: number) {
+    return this.postsService.send('findPostsPopulares', { limit: limit ?? 10 });
+  }
+
+  @Get('trending')
+  findPostsTrending(@Query('limit') limit?: number) {
+    return this.postsService.send('findPostsTrending', { limit: limit ?? 10 });
+  }
+
+  @Get('engagement')
+  findPostsConEngagement(@Query('limit') limit?: number) {
+    return this.postsService.send('findPostsConEngagement', { limit: limit ?? 20 });
+  }
+
+  @Get('sin-comentarios')
+  findPostsSinComentarios() {
+    return this.postsService.send('findPostsSinComentarios', {});
+  }
+
+  @Get('mas-compartidos')
+  findPostsMasCompartidos(@Query('limit') limit?: number) {
+    return this.postsService.send('findPostsMasCompartidos', { limit: limit ?? 10 });
+  }
+
+  @Get('borradores-antiguos')
+  findBorradoresAntiguos() {
+    return this.postsService.send('findBorradoresAntiguos', {});
+  }
+
+  @Get('stats/por-mes')
+  getEstadisticasPorMes(@Query('meses') meses?: number) {
+    return this.postsService.send('getEstadisticasPorMes', { meses: meses ?? 12 });
+  }
+
+  @Get('stats/mejor-rendimiento/:autorId')
+  findMejorRendimientoPorAutor(@Param('autorId') autorId: number, @Query('limit') limit?: number) {
+    return this.postsService.send('findMejorRendimientoPorAutor', { autorId, limit: limit ?? 5 });
+  }
+
+  @Get('stats/dashboard')
+  getDashboardOverview() {
+    return this.postsService.send('getDashboardOverview', {});
+  }
+
+  // ==================== ENDPOINTS QUE USAN TRIGGERS ====================
+
+  @Post('vista/:postId')
+  async incrementarVista(@Param('postId') postId: number, @Body() body: { userId?: number; ipAddress?: string }) {
+    console.log("las variables son primero del user: ", body.userId, "del ip: ", body.ipAddress);
+    try {
+      const response$ = this.postsService.send('incrementarVista', {
+        postId,
+        userId: body.userId,
+        ipAddress: body.ipAddress,
+      });
+      const result = await response$.toPromise();
+      return result ?? { success: true };
+    } catch (error) {
+      console.error('❌ Gateway - incrementarVista error:', error);
+      throw error;
+    }
+  }
+
+  @Post('like/:postId')
+  async darLike(@Param('postId') postId: number, @Body() body: { userId: number }) {
+    console.log('🔵 Gateway - darLike:', { postId, userId: body.userId });
+    try {
+      const result = await this.postsService.send('darLike', { 
+        postId: Number(postId), 
+        userId: Number(body.userId) 
+      }).toPromise();
+      console.log('✅ Gateway - darLike success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Gateway - darLike error:', error);
+      throw error;
+    }
+  }
+
+  @Delete('like/:postId')
+  async quitarLike(@Param('postId') postId: number, @Body() body: { userId?: number }, @Query('userId') queryUserId?: number) {
+    const userId = body?.userId || queryUserId;
+    console.log('🔴 Gateway - quitarLike:', { postId, userId, body, queryUserId });
+    
+    if (!userId) {
+      throw new Error('userId es requerido en body o query params');
+    }
+    
+    try {
+      const result = await this.postsService.send('quitarLike', { 
+        postId: Number(postId), 
+        userId: Number(userId) 
+      }).toPromise();
+      console.log('✅ Gateway - quitarLike success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Gateway - quitarLike error:', error);
+      throw error;
+    }
+  }
+
+  // ==================== ENDPOINTS PARA KEYWORDS ====================
+
+  /**
+   * Buscar o crear keyword por nombre
+   */
+  @Post('keywords/find-or-create')
+  findOrCreateKeyword(@Body() body: { keyword: string }) {
+    return this.postsService.send('findOrCreateKeyword', { keyword: body.keyword });
+  }
+
+  /**
+   * Obtener keywords más usadas
+   */
+  @Get('keywords/mas-usadas')
+  getKeywordsMasUsadas(@Query('limit') limit?: number) {
+    return this.postsService.send('getKeywordsMasUsadas', { limit: limit ?? 50 });
   }
 
   // @UseGuards(SupabaseAuthGuard)
@@ -48,5 +213,46 @@ export class PostsController {
   @Post(':id/add-categorias')
   addCategorias(@Param('id') id: number, @Body() addCategoriasDto: AddCategoriasPostDto) {
     return this.postsService.send('addCategoriasPost', { id, ...addCategoriasDto });
+  }
+
+  /**
+   * Agregar keywords existentes a un post
+   */
+  @Post(':postId/keywords')
+  addKeywords(@Param('postId') postId: number, @Body() body: { keywordIds: number[] }) {
+    return this.postsService.send('addKeywordsToPost', { postId, keywordIds: body.keywordIds });
+  }
+
+  /**
+   * Crear nuevas keywords y asociarlas a un post
+   */
+  @Post(':postId/keywords/create')
+  createAndAddKeywords(@Param('postId') postId: number, @Body() body: { keywords: string[] }) {
+    return this.postsService.send('createAndAddKeywords', { postId, keywords: body.keywords });
+  }
+
+  /**
+   * Obtener keywords de un post
+   */
+  @Get(':postId/keywords')
+  getPostKeywords(@Param('postId') postId: number) {
+    return this.postsService.send('getPostKeywords', { postId });
+  }
+
+  /**
+   * Eliminar keywords de un post
+   */
+  @Delete(':postId/keywords')
+  removeKeywords(@Param('postId') postId: number, @Body() body: { keywordIds?: number[] }) {
+    return this.postsService.send('removeKeywordsFromPost', { postId, keywordIds: body.keywordIds });
+  }
+
+  private serializeFile(file: Express.Multer.File) {
+    return {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      buffer: file.buffer,
+      size: file.size,
+    };
   }
 }
