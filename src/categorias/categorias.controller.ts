@@ -8,11 +8,11 @@ import { UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
 
 @Controller('categorias')
-@UseGuards(SupabaseAuthGuard) 
+// @UseGuards(SupabaseAuthGuard) 
 export class CategoriasController {
   constructor(@Inject(CATEGORIA_SERVICE) private readonly categoriasService: ClientProxy) {}
 
-  // @UseGuards(SupabaseAuthGuard) 
+  @UseGuards(SupabaseAuthGuard) 
   @Post()
   create(@Body() createCategoriaDto: CreateCategoriaDto) {
     console.log("createCategoriaDto", createCategoriaDto);
@@ -50,7 +50,7 @@ export class CategoriasController {
 
 
 
-  // @UseGuards(SupabaseAuthGuard) 
+  @UseGuards(SupabaseAuthGuard) 
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -61,28 +61,32 @@ export class CategoriasController {
     return this.categoriasService.send('updateCategoria', payload);
   }
 
-  // @UseGuards(SupabaseAuthGuard) 
+  @UseGuards(SupabaseAuthGuard) 
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.categoriasService.send('removeCategoria', { id });
   }
 
   // Endpoints de estadísticas
+  // @UseGuards(SupabaseAuthGuard) 
   @Get('stats/general')
   getStats() {
     return this.categoriasService.send('getCategoriasStats', {});
   }
 
+  // @UseGuards(SupabaseAuthGuard) 
   @Get('stats/engagement')
   getEngagement() {
     return this.categoriasService.send('getEngagementPorCategoria', {});
   }
 
+  // @UseGuards(SupabaseAuthGuard) 
   @Get('stats/mejor-rendimiento')
   getMejorRendimiento() {
     return this.categoriasService.send('getCategoriasMejorRendimiento', {});
   }
 
+  // @UseGuards(SupabaseAuthGuard) 
   @Get('stats/jerarquicas')
   getJerarquicas() {
     return this.categoriasService.send('getCategoriasJerarquicas', {});
