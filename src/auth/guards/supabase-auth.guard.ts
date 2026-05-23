@@ -60,22 +60,22 @@ export class SupabaseAuthGuard implements CanActivate {
             })
           );
 
-          // console.log('📡 Raw response:', JSON.stringify(res, null, 2));
+          console.log('📡 Raw response:', JSON.stringify(res, null, 2));
 
           let dbUser = Array.isArray(res) && res.length > 0 ? res[0] : null;
           
-          // console.log('👤 Extracted dbUser:', JSON.stringify(dbUser, null, 2));
-          // console.log('👤 dbUser type:', typeof dbUser);
-          // console.log('👤 dbUser.rolId:', dbUser?.rolId, '(type:', typeof dbUser?.rolId, ')');
-          // console.log('👤 dbUser.roleName:', dbUser?.roleName);
-          // console.log('👤 dbUser.rol:', dbUser?.rol);
+          console.log('👤 Extracted dbUser:', JSON.stringify(dbUser, null, 2));
+          console.log('👤 dbUser type:', typeof dbUser);
+          console.log('👤 dbUser.rolId:', dbUser?.rolId, '(type:', typeof dbUser?.rolId, ')');
+          console.log('👤 dbUser.roleName:', dbUser?.roleName);
+          console.log('👤 dbUser.rol:', dbUser?.rol);
           
           if (dbUser && dbUser.rolId != null) {
             rolId = Number(dbUser.rolId);
             roleName = dbUser.roleName || dbUser.rol?.nombre || 'authenticated';
-            // console.log('✅ Role assigned - rolId:', rolId, ', roleName:', roleName);
+            console.log('✅ Role assigned - rolId:', rolId, ', roleName:', roleName);
           } else {
-            // console.log('❌ No role found - dbUser exists:', !!dbUser, ', rolId exists:', dbUser?.rolId != null);
+            console.log('❌ No role found - dbUser exists:', !!dbUser, ', rolId exists:', dbUser?.rolId != null);
           }
         } catch (e) {
           console.warn('User role lookup failed:', e.message);
